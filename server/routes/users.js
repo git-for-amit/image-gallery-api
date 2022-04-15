@@ -54,12 +54,37 @@ router.post('/sign-in', async (req, res, next) => {
       id: user.id,
       firstName: user.firstName,
       lastName: user.lastName,
-      email: user.email
+      email: user.email,
+      approved: user.approved
     });
   } catch (err) {
     res.status(500).send({ message: "User sign In failed!", err: err });
   }
 });
 
+router.post('/approve', async (req, res, next) => {
+  try {
+    const user = await User.findOne({
+      where: {
+        id: req.body.id,
+      },
+    });
+    if (!user) {
+      return res.status(404).send({ message: "User Not found!" });
+    }
+    user.approved = req.body.approved
+    await user.save();
+    
+    return res.status(200).send({
+      id: user.id,
+      firstName: user.firstName,
+      lastName: user.lastName,
+      email: user.email,
+      approved: user.approved
+    });
+  } catch (err) {
+    res.status(500).send({ message: "User Approval failed!", err: err });
+  }
+});
 
 export default router;

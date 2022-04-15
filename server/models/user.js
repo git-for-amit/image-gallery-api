@@ -18,6 +18,9 @@ const User = sequelize.define('User', {
     },
     lastName: {
         type: DataTypes.STRING
+    },
+    approved: {
+        type: DataTypes.STRING
     }
 });
 
