@@ -1,6 +1,8 @@
 import express from 'express'
 import User from '../models/user'
 import bcrypt from 'bcrypt'
+import { Secret } from '../config/secret';
+import { sign } from 'jsonwebtoken';
 
 var router = express.Router();
 
@@ -49,13 +51,20 @@ router.post('/sign-in', async (req, res, next) => {
         message: "Invalid Password!",
       });
     }
-
+    let secret = Secret.get();
+    console.log("secret value ", secret);
+    let payload = {
+      email: user.email
+    }
+    let token = sign(payload, secret, { expiresIn: 1800 })
+    console.log('token ', token)
     return res.status(200).send({
       id: user.id,
       firstName: user.firstName,
       lastName: user.lastName,
       email: user.email,
-      approved: user.approved
+      approved: user.approved,
+      token: token
     });
   } catch (err) {
     res.status(500).send({ message: "User sign In failed!", err: err });
@@ -74,7 +83,7 @@ router.post('/approve', async (req, res, next) => {
     }
     user.approved = req.body.approved
     await user.save();
-    
+
     return res.status(200).send({
       id: user.id,
       firstName: user.firstName,
