@@ -16,11 +16,11 @@ router.get('/:userId', async (req, res, next) => {
         let imageFolder = `public/images/${req.params.userId}`;
         let allFileNames = []
         fs.readdirSync(imageFolder).forEach(file => {
-            if(imgeFileRegex.test(file)){
+            if (imgeFileRegex.test(file)) {
                 let imageFileName = `images/${req.params.userId}/` + file;
                 allFileNames.push(imageFileName);
             }
-            
+
         });
         let listOfFiles = {
             fileNameList: allFileNames
