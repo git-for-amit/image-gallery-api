@@ -3,6 +3,7 @@ import * as fs from 'fs';
 import * as path from 'path';
 import { verify } from 'jsonwebtoken';
 import { Secret } from '../config/secret';
+import { uploadFilesMiddlewarePromisified } from '../util/upload'
 
 var router = express.Router();
 
@@ -68,4 +69,16 @@ router.get('/:userId/:imageFileName',
         }
     });
 
+
+
+router.post('/upload-all', async (req, res, next) => {
+    try {
+        await uploadFilesMiddlewarePromisified(req, res);
+        console.log("number of files uploaded ", req.files.length);
+        return res.status(200).send({ message: "Upload Successful" })
+    } catch (err) {
+        console.log(err)
+        res.status(500).send({ message: "Unable to upload files!", err: err });
+    }
+});
 export default router;
