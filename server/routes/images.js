@@ -12,11 +12,15 @@ var router = express.Router();
 /* GET users listing. */
 router.get('/:userId', async (req, res, next) => {
     try {
+        let imgeFileRegex = /\.(png|gif|webp|jpeg|jpg)\??.*$/gmi;
         let imageFolder = `public/images/${req.params.userId}`;
         let allFileNames = []
         fs.readdirSync(imageFolder).forEach(file => {
-            let imageFileName = `images/${req.params.userId}/` + file;
-            allFileNames.push(imageFileName);
+            if(imgeFileRegex.test(file)){
+                let imageFileName = `images/${req.params.userId}/` + file;
+                allFileNames.push(imageFileName);
+            }
+            
         });
         let listOfFiles = {
             fileNameList: allFileNames
