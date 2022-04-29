@@ -7,10 +7,10 @@ const UserImage = sequelize.define('UserImage', {
         autoIncrement: true,
         primaryKey: true
     },
-    userId: {
+    userid: {
         type: DataTypes.INTEGER
     },
-    imageId: {
+    imageid: {
         type: DataTypes.INTEGER
     }
 });

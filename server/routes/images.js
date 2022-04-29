@@ -6,6 +6,8 @@ import { Secret } from '../config/secret';
 import { uploadFilesMiddlewarePromisified } from '../util/upload'
 import Image from '../models/db-image'
 import Util from '../util/util';
+import UserImage from '../models/db-image-user'
+import User from '../models/user';
 
 var router = express.Router();
 
@@ -14,16 +16,50 @@ var router = express.Router();
 /* GET users listing. */
 router.get('/:userId', async (req, res, next) => {
     try {
-        let imageFolder = `public/images/${req.params.userId}`;
+        let email = req.params.userId;
+        let userList = await User.findAll({
+            where: {
+                email: email
+            }
+        })
+        let imageList = null;
+        if (email == 'admin') {
+            imageList = await Image.findAll();
+        } else {
+            if (userList && userList.length) {
+                console.log('got userList')
+                let userImageList = await UserImage.findAll({
+                    where: {
+                        userid: userList[0].id
+                    }
+                })
+                console.log('value of userImageList')
+                if (userImageList && userImageList.length) {
+                    imageList = []
+                    for (let uimg of userImageList) {
+                        let img = await Image.findOne({
+                            where: {
+                                id: uimg.imageid
+                            }
+                        });
+                        imageList.push(img);
+                    }
+
+                }
+            }
+
+        }
+        let imageFolder = `public/images/admin`;
+
         let imageObjectFileList = []
-        const imageList = await Image.findAll();
+
         console.log("value of imagelist")
         if (imageList) {
             for (let i = 0; i < imageList.length; i++) {
                 const imPath = imageList[i].path;
                 if (fs.existsSync(imPath)) {
                     if (imPath.indexOf('.xls') == -1 && imPath.indexOf('.xlsx') == -1) {
-                        let relativePath = `images/${req.params.userId}/` + imageList[i].filename;
+                        let relativePath = `images/admin/` + imageList[i].filename;
                         let id = imageList[i].id;
                         let code = imageList[i].code;
                         let categoryname = imageList[i].categoryname;
@@ -119,8 +155,47 @@ router.post('/upload-all', async (req, res, next) => {
 
 router.post('/assign', async (req, res, next) => {
     try {
-        let imageAssignmentData = req.body.imageAssignmentData;
+        let imageAssignmentData = req.body;
         console.log(imageAssignmentData);
+        if (imageAssignmentData.userList) {
+            let userList = imageAssignmentData.userList;
+            for (let u of userList) {
+                let existingUserImage = await UserImage.findAll({
+                    where: {
+                        userid: u.id,
+                    }
+                });
+                if (existingUserImage && existingUserImage.length) {
+                    await UserImage.destroy({
+                        where: {
+                            userid: u.id
+                        }
+                    })
+                }
+            }
+            if (imageAssignmentData.imageList) {
+                let imageList = imageAssignmentData.imageList;
+                for (let u of userList) {
+                    for (let img of imageList) {
+                        let existingUserImage = await UserImage.findAll({
+                            where: {
+                                userid: u.id,
+                                imageid: img.id
+                            }
+                        })
+                        if (existingUserImage && existingUserImage.length) {
+                            continue;
+                        } else {
+                            await UserImage.create({
+                                userid: u.id,
+                                imageid: img.id
+                            });
+                        }
+                    }
+                }
+            }
+        }
+        return res.status(200).send({ message: "Image Assignment Successful" })
     } catch (err) {
         console.log(err)
         res.status(500).send({ message: "Unable to assign images to user!", err: err });
