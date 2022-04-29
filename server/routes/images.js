@@ -4,6 +4,8 @@ import * as path from 'path';
 import { verify } from 'jsonwebtoken';
 import { Secret } from '../config/secret';
 import { uploadFilesMiddlewarePromisified } from '../util/upload'
+import Image from '../models/db-image'
+import Util from '../util/util';
 
 var router = express.Router();
 
@@ -78,11 +80,18 @@ router.get('/:userId/:imageFileName',
 router.post('/upload-all', async (req, res, next) => {
     try {
         await uploadFilesMiddlewarePromisified(req, res);
-        console.log("number of files uploaded ", req.files.length);
+        for (let file of req.files) {
+            if (file && file.filename.indexOf(".xlsx") != -1) {
+                let fileObjectArr =  await Util.getAllFileObjects(file.path);
+                await Util.saveImages(fileObjectArr);
+            }
+        }
         return res.status(200).send({ message: "Upload Successful" })
     } catch (err) {
         console.log(err)
         res.status(500).send({ message: "Unable to upload files!", err: err });
     }
 });
+
+
 export default router;
