@@ -14,18 +14,41 @@ var router = express.Router();
 /* GET users listing. */
 router.get('/:userId', async (req, res, next) => {
     try {
-        let imgeFileRegex = /\.(png|gif|webp|jpeg|jpg)\??.*$/gmi;
         let imageFolder = `public/images/${req.params.userId}`;
-        let allFileNames = []
-        fs.readdirSync(imageFolder).forEach(file => {
-            if (imgeFileRegex.test(file)) {
-                let imageFileName = `images/${req.params.userId}/` + file;
-                allFileNames.push(imageFileName);
+        let imageObjectFileList = []
+        const imageList = await Image.findAll();
+        console.log("value of imagelist")
+        if (imageList) {
+            for (let i = 0; i < imageList.length; i++) {
+                const imPath = imageList[i].path;
+                if (fs.existsSync(imPath)) {
+                    if (imPath.indexOf('.xls') == -1 && imPath.indexOf('.xlsx') == -1) {
+                        let relativePath = `images/${req.params.userId}/` + imageList[i].filename;
+                        let id = imageList[i].id;
+                        let code = imageList[i].code;
+                        let categoryname = imageList[i].categoryname;
+                        let filename = imageList[i].filename
+                        imageObjectFileList.push({
+                            relativePath,
+                            id,
+                            code,
+                            categoryname,
+                            filename
+                        });
+                    }
+                }
             }
+        }
 
-        });
+        // fs.readdirSync(imageFolder).forEach(file => {
+        //     if (file.indexOf('.xls') == -1 && file.indexOf('.xlsx') == -1) {
+        //         let imageFileName = `images/${req.params.userId}/` + file;
+        //         allFileNames.push(imageFileName);
+        //     }
+
+        // });
         let listOfFiles = {
-            fileNameList: allFileNames
+            images: imageObjectFileList
         }
         res.status(200).send(listOfFiles);
     } catch (err) {
@@ -49,6 +72,7 @@ router.get('/:userId/:imageFileName',
     async (req, res, next) => {
         try {
             let requestedImageFileName = req.params.imageFileName;
+            requestedImageFileName = decodeURIComponent(requestedImageFileName);
             if (!requestedImageFileName) {
                 res.status(404).send('The requested resource was not found');
                 return;
@@ -57,7 +81,7 @@ router.get('/:userId/:imageFileName',
             let imageFilePath = ''
             let fileNames = fs.readdirSync(imageFolder);
             for (let file of fileNames) {
-                if (requestedImageFileName == file) {
+                if (requestedImageFileName.toLowerCase() == file.toLowerCase()) {
                     imageFilePath = `../../public/images/${req.params.userId}/` + file;
                     break;
                 }
@@ -82,7 +106,7 @@ router.post('/upload-all', async (req, res, next) => {
         await uploadFilesMiddlewarePromisified(req, res);
         for (let file of req.files) {
             if (file && file.filename.indexOf(".xlsx") != -1) {
-                let fileObjectArr =  await Util.getAllFileObjects(file.path);
+                let fileObjectArr = await Util.getAllFileObjects(file.path);
                 await Util.saveImages(fileObjectArr);
             }
         }
@@ -92,6 +116,16 @@ router.post('/upload-all', async (req, res, next) => {
         res.status(500).send({ message: "Unable to upload files!", err: err });
     }
 });
+
+router.post('/assign', async (req, res, next) => {
+    try {
+        let imageAssignmentData = req.body.imageAssignmentData;
+        console.log(imageAssignmentData);
+    } catch (err) {
+        console.log(err)
+        res.status(500).send({ message: "Unable to assign images to user!", err: err });
+    }
+})
 
 
 export default router;

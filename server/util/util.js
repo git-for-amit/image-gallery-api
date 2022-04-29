@@ -27,7 +27,6 @@ export default class Util {
                         code: fileObject.code
                     }
                 });
-                console.log(existingImages);
                 if (existingImages && existingImages.length) {
                     await Image.update({
                         attributes: fileObject.attributes
