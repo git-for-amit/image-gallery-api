@@ -13,7 +13,7 @@ var router = express.Router();
 
 
 
-/* GET users listing. */
+/* GET images listing. */
 router.get('/:userId', async (req, res, next) => {
     try {
         let email = req.params.userId;
@@ -27,13 +27,11 @@ router.get('/:userId', async (req, res, next) => {
             imageList = await Image.findAll();
         } else {
             if (userList && userList.length) {
-                console.log('got userList')
                 let userImageList = await UserImage.findAll({
                     where: {
                         userid: userList[0].id
                     }
                 })
-                console.log('value of userImageList')
                 if (userImageList && userImageList.length) {
                     imageList = []
                     for (let uimg of userImageList) {
@@ -49,17 +47,20 @@ router.get('/:userId', async (req, res, next) => {
             }
 
         }
-        let imageFolder = `public/images/admin`;
 
         let imageObjectFileList = []
 
-        console.log("value of imagelist")
         if (imageList) {
+            let allFileNamesInTheDirectory = Util.getAllImageNamesInTheDirectory()
+            allFileNamesInTheDirectory = allFileNamesInTheDirectory.map((value, index, array) => {
+                return Util.applyFileNameTransformation(value);
+            })
             for (let i = 0; i < imageList.length; i++) {
                 const imPath = imageList[i].path;
-                if (fs.existsSync(imPath)) {
-                    if (imPath.indexOf('.xls') == -1 && imPath.indexOf('.xlsx') == -1) {
-                        let relativePath = `images/admin/` + imageList[i].filename;
+                if (imPath.indexOf('.xls') == -1 && imPath.indexOf('.xlsx') == -1) {
+                    let fn = imageList[i].filename;
+                    if (allFileNamesInTheDirectory.indexOf(Util.applyFileNameTransformation(fn)) != -1) {
+                        let relativePath = Util.getPartialRelativePath() + fn;
                         let id = imageList[i].id;
                         let code = imageList[i].code;
                         let categoryname = imageList[i].categoryname;
@@ -72,17 +73,11 @@ router.get('/:userId', async (req, res, next) => {
                             filename
                         });
                     }
+
                 }
             }
         }
 
-        // fs.readdirSync(imageFolder).forEach(file => {
-        //     if (file.indexOf('.xls') == -1 && file.indexOf('.xlsx') == -1) {
-        //         let imageFileName = `images/${req.params.userId}/` + file;
-        //         allFileNames.push(imageFileName);
-        //     }
-
-        // });
         let listOfFiles = {
             images: imageObjectFileList
         }
@@ -113,17 +108,20 @@ router.get('/:userId/:imageFileName',
                 res.status(404).send('The requested resource was not found');
                 return;
             }
-            let imageFolder = `public/images/${req.params.userId}`;
-            let imageFilePath = ''
-            let fileNames = fs.readdirSync(imageFolder);
-            for (let file of fileNames) {
-                if (requestedImageFileName.toLowerCase() == file.toLowerCase()) {
-                    imageFilePath = `../../public/images/${req.params.userId}/` + file;
+
+            let absImageFilePath
+            let fileNames = Util.getAllImageNamesInTheDirectory();
+            requestedImageFileName = Util.applyFileNameTransformation(requestedImageFileName);
+
+            for (let actualFileNameOnDisk of fileNames) {
+                console.log("value of requestedImageFileName ", requestedImageFileName)
+                let modifiedFileNameOnDisk = Util.applyFileNameTransformation(actualFileNameOnDisk);
+                if (requestedImageFileName == modifiedFileNameOnDisk) {
+                    absImageFilePath = path.resolve(Util.getImageStorageDirectory(), actualFileNameOnDisk);
                     break;
                 }
             }
-            if (imageFilePath) {
-                let absImageFilePath = path.resolve(__dirname, imageFilePath)
+            if (absImageFilePath) {
                 res.sendFile(absImageFilePath);
             } else {
                 res.status(404).send('The requested resource was not found');

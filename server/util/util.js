@@ -1,8 +1,17 @@
 import XLSXParser from "./xlsx-parser";
 import SheetDataMapper from "./sheet-data-mapper";
 import Image from "../models/db-image";
+import * as fs from 'fs'
+import * as path from 'path';
+
 
 export default class Util {
+    static getPartialRelativePath() {
+        return 'images/admin/'
+    }
+    static getImageStorageDirectory() {
+        return path.resolve(__dirname, '../../public/', Util.getPartialRelativePath());
+    }
     static async getAllFileObjects(fileName) {
         let fileObjectArr = []
         let xp = new XLSXParser(fileName);
@@ -48,5 +57,29 @@ export default class Util {
                 }
             }
         }
+    }
+
+    static getAllImageNamesInTheDirectory() {
+        let absImageFilePath = Util.getImageStorageDirectory();
+        let fileNames = fs.readdirSync(absImageFilePath);
+        return fileNames;
+    }
+
+    static getStringIndex(findInString, stringToFind) {
+        let stringToFindLength = stringToFind.length;
+        let index = findInString.indexOf(stringToFind);
+        if (index != -1) {
+            index = index + stringToFindLength;
+        }
+        return index;
+    }
+
+    static applyFileNameTransformation(stringFileName) {
+        stringFileName = stringFileName.toLowerCase();
+        if (stringFileName.indexOf(".") != -1) {
+            stringFileName = stringFileName.substring(0, stringFileName.lastIndexOf("."));
+        }
+        stringFileName = stringFileName.replaceAll(" ", "");
+        return stringFileName;
     }
 }
