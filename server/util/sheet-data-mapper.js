@@ -7,7 +7,7 @@ export default class SheetDataMapper {
         this.jsonData = jsonData;
     }
 
-    mapJsonToDBData() {
+    mapJsonToDBData(sheetname) {
         let jd = this.jsonData;
         let arr = []
         if (jd && jd instanceof Array) {
@@ -16,14 +16,14 @@ export default class SheetDataMapper {
                     continue;
                 }
                 let keys = Object.keys(jd[i]);
-                let categoryname = '';
+                let subcategoryname = '';
                 let filenameArray = []
                 let attributes = ''
                 let code = ''
                 for (let j = 0; j < keys.length; j++) {
                     switch (j) {
                         case 0: {
-                            categoryname = jd[i][keys[j]];
+                            subcategoryname = jd[i][keys[j]];
                             break;
                         }
                         case 1: {
@@ -93,9 +93,10 @@ export default class SheetDataMapper {
                     let object = {
                         path: fullPath,
                         filename: fn,
-                        categoryname: categoryname,
+                        categoryname: sheetname,
                         attributes: attributes,
-                        code: code
+                        code: code,
+                        subcategoryname: subcategoryname
                     }
                     arr.push(object);
                 }

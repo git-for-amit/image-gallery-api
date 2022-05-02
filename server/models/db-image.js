@@ -21,6 +21,9 @@ const Image = sequelize.define('Image', {
     },
     categoryname: {
         type: DataTypes.STRING
+    },
+    subcategoryname: {
+        type: DataTypes.STRING
     }
 });
 

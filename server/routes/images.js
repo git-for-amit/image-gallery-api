@@ -16,22 +16,39 @@ var router = express.Router();
 /* GET images listing. */
 router.get('/:userId', async (req, res, next) => {
     try {
+        let categoryname = req.query.categoryname;
+
         let email = req.params.userId;
         let userList = await User.findAll({
             where: {
-                email: email
+                email: email,
             }
         })
         let imageList = null;
         if (email == 'admin') {
-            imageList = await Image.findAll();
+            imageList = null;
+            if (!categoryname) {
+                imageList = await Image.findAll()
+            } else {
+                imageList = await Image.findAll({
+                    where: {
+                        categoryname: categoryname
+                    }
+                })
+            }
+
+            console.log("imageList", imageList);
         } else {
             if (userList && userList.length) {
-                let userImageList = await UserImage.findAll({
+                let whereClause = {
                     where: {
                         userid: userList[0].id
                     }
-                })
+                };
+                if (categoryname) {
+                    whereClause.where.categoryname = categoryname;
+                }
+                let userImageList = await UserImage.findAll(whereClause);
                 if (userImageList && userImageList.length) {
                     imageList = []
                     for (let uimg of userImageList) {
@@ -64,13 +81,15 @@ router.get('/:userId', async (req, res, next) => {
                         let id = imageList[i].id;
                         let code = imageList[i].code;
                         let categoryname = imageList[i].categoryname;
+                        let subcategoryname = imageList[i].subcategoryname;
                         let filename = imageList[i].filename
                         imageObjectFileList.push({
                             relativePath,
                             id,
                             code,
                             categoryname,
-                            filename
+                            filename,
+                            subcategoryname
                         });
                     }
 

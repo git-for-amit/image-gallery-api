@@ -20,7 +20,7 @@ export default class Util {
         for (let sn of sheetNames) {
             let jsonData = xp.getJsonData(sn);
             let sdm = new SheetDataMapper(jsonData);
-            let fbArr = sdm.mapJsonToDBData()
+            let fbArr = sdm.mapJsonToDBData(sn)
             fileObjectArr = fileObjectArr.concat(fbArr);
         }
         return fileObjectArr;
@@ -32,18 +32,17 @@ export default class Util {
                 const existingImages = await Image.findAll({
                     where: {
                         filename: fileObject.filename,
-                        categoryname: fileObject.categoryname,
-                        code: fileObject.code
                     }
                 });
                 if (existingImages && existingImages.length) {
                     await Image.update({
-                        attributes: fileObject.attributes
+                        attributes: fileObject.attributes,
+                        categoryname: fileObject.categoryname,
+                        code: fileObject.code,
+                        subcategoryname: fileObject.subcategoryname
                     }, {
                         where: {
                             filename: fileObject.filename,
-                            categoryname: fileObject.categoryname,
-                            code: fileObject.code
                         }
                     })
                 } else {
@@ -52,7 +51,8 @@ export default class Util {
                         categoryname: fileObject.categoryname,
                         code: fileObject.code,
                         path: fileObject.path,
-                        attributes: fileObject.attributes
+                        attributes: fileObject.attributes,
+                        subcategoryname: fileObject.subcategoryname
                     })
                 }
             }
