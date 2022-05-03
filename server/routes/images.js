@@ -79,27 +79,30 @@ router.get('/:userId', async (req, res, next) => {
                 return Util.applyFileNameTransformation(value);
             })
             for (let i = 0; i < imageList.length; i++) {
-                const imPath = imageList[i].path;
-                if (imPath.indexOf('.xls') == -1 && imPath.indexOf('.xlsx') == -1) {
-                    let fn = imageList[i].filename;
-                    if (allFileNamesInTheDirectory.indexOf(Util.applyFileNameTransformation(fn)) != -1) {
-                        let relativePath = Util.getPartialRelativePath() + fn;
-                        let id = imageList[i].id;
-                        let code = imageList[i].code;
-                        let categoryname = imageList[i].categoryname;
-                        let subcategoryname = imageList[i].subcategoryname;
-                        let filename = imageList[i].filename
-                        imageObjectFileList.push({
-                            relativePath,
-                            id,
-                            code,
-                            categoryname,
-                            filename,
-                            subcategoryname
-                        });
-                    }
+                if (imageList[i]) {
+                    const imPath = imageList[i].path;
+                    if (imPath.indexOf('.xls') == -1 && imPath.indexOf('.xlsx') == -1) {
+                        let fn = imageList[i].filename;
+                        if (allFileNamesInTheDirectory.indexOf(Util.applyFileNameTransformation(fn)) != -1) {
+                            let relativePath = Util.getPartialRelativePath() + fn;
+                            let id = imageList[i].id;
+                            let code = imageList[i].code;
+                            let categoryname = imageList[i].categoryname;
+                            let subcategoryname = imageList[i].subcategoryname;
+                            let filename = imageList[i].filename
+                            imageObjectFileList.push({
+                                relativePath,
+                                id,
+                                code,
+                                categoryname,
+                                filename,
+                                subcategoryname
+                            });
+                        }
 
+                    }
                 }
+
             }
         }
 
@@ -108,6 +111,7 @@ router.get('/:userId', async (req, res, next) => {
         }
         res.status(200).send(listOfFiles);
     } catch (err) {
+        console.log('Error while retrieving image names ', err)
         res.status(500).send({ message: "User get image file names!", err: err });
     }
 });

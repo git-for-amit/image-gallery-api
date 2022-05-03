@@ -64,7 +64,9 @@ export default class SheetDataMapper {
                                     if (startIndex == -1) {
                                         startIndex = Util.getStringIndex(lowerCaseValue, "file name");
                                     }
-
+                                    if(startIndex == -1){
+                                        startIndex = 0;
+                                    }
                                 }
                                 let endIndex = Util.getStringIndex(lowerCaseValue, ".jpeg");
                                 if (endIndex == -1) {
