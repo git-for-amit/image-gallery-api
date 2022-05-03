@@ -40,23 +40,29 @@ router.get('/:userId', async (req, res, next) => {
             console.log("imageList", imageList);
         } else {
             if (userList && userList.length) {
-                let whereClause = {
+                let userImageList = await UserImage.findAll({
                     where: {
                         userid: userList[0].id
                     }
-                };
-                if (categoryname) {
-                    whereClause.where.categoryname = categoryname;
-                }
-                let userImageList = await UserImage.findAll(whereClause);
+                });
                 if (userImageList && userImageList.length) {
                     imageList = []
-                    for (let uimg of userImageList) {
-                        let img = await Image.findOne({
+                    let whereClause = null;
+                    if (categoryname) {
+                        whereClause = {
                             where: {
-                                id: uimg.imageid
+                                categoryname: categoryname
                             }
-                        });
+                        }
+                    } else {
+                        whereClause = {
+                            where: {
+                            }
+                        }
+                    }
+                    for (let uimg of userImageList) {
+                        whereClause.where.id = uimg.imageid;
+                        let img = await Image.findOne(whereClause);
                         imageList.push(img);
                     }
 
