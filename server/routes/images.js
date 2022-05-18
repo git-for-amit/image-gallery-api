@@ -90,13 +90,15 @@ router.get('/:userId', async (req, res, next) => {
                             let categoryname = imageList[i].categoryname;
                             let subcategoryname = imageList[i].subcategoryname;
                             let filename = imageList[i].filename
+                            let attributes = imageList[i].attributes;
                             imageObjectFileList.push({
                                 relativePath,
                                 id,
                                 code,
                                 categoryname,
                                 filename,
-                                subcategoryname
+                                subcategoryname,
+                                attributes
                             });
                         }
 
