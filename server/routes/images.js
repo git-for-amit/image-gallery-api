@@ -119,19 +119,19 @@ router.get('/:userId', async (req, res, next) => {
 });
 
 router.get('/:userId/:imageFileName',
-    (req, res, next) => {
-        next();
-        // const authHeader = req.headers['authorization']
-        // const token = authHeader && authHeader.split(' ')[1]
+    // (req, res, next) => {
+    //     next();
+    //     const authHeader = req.headers['authorization']
+    //     const token = authHeader && authHeader.split(' ')[1]
 
-        // if (token == null) return res.sendStatus(401)
-        // let verified = verify(token, Secret.get());
-        // if (verified) {
-        //     next()
-        // } else {
-        //     return res.sendStatus(401);
-        // }
-    },
+    //     if (token == null) return res.sendStatus(401)
+    //     let verified = verify(token, Secret.get());
+    //     if (verified) {
+    //         next()
+    //     } else {
+    //         return res.sendStatus(401);
+    //     }
+    // },
     async (req, res, next) => {
         try {
             let requestedImageFileName = req.params.imageFileName;
